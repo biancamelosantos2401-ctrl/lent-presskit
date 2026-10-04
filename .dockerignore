@@ -1,0 +1,8 @@
+node_modules
+.next
+.git
+docs/reference/site-admin-reference.png
+LENT-CODEX-PACK.zip
+*.log
+.env*
+!/.env.example

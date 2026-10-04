@@ -1,0 +1,170 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  name         String?
+  passwordHash String
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model SiteSettings {
+  id                String   @id @default("default")
+  realName          String
+  location          String
+  country           String
+  tagline           String
+  heroImage         String
+  heroImages        String   @default("[]")
+  heroIntervalSeconds Int     @default(7)
+  bookingUrl        String?
+  whatsappEnabled   Boolean  @default(false)
+  whatsappPhone     String?
+  whatsappMessage   String?
+  whatsappButtonText String   @default("Entrar em contato")
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+}
+
+model SectionSettings {
+  id        String   @id @default(cuid())
+  section   String   @unique
+  title     String
+  subtitle  String
+  cta       String
+  enabled   Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model SocialLink {
+  id        String   @id @default(cuid())
+  platform  String
+  url       String
+  enabled   Boolean  @default(true)
+  position  Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([platform])
+  @@index([enabled, position])
+}
+
+model AgendaItem {
+  id        String   @id @default(cuid())
+  eventDate DateTime
+  title     String
+  venue     String
+  city      String
+  state     String
+  country   String
+  status    String
+  ticketUrl String?
+  enabled   Boolean  @default(true)
+  position  Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([enabled, eventDate, position])
+}
+
+model RecentEvent {
+  id          String             @id @default(cuid())
+  title       String
+  subtitle    String
+  description String
+  eventDate   DateTime
+  city        String
+  state       String
+  coverImage  String
+  enabled     Boolean            @default(true)
+  position    Int                @default(0)
+  images      RecentEventImage[]
+  createdAt   DateTime           @default(now())
+  updatedAt   DateTime           @updatedAt
+
+  @@index([enabled, eventDate, position])
+}
+
+model RecentEventImage {
+  id        String      @id @default(cuid())
+  eventId   String
+  imageUrl  String
+  position  Int         @default(0)
+  event     RecentEvent @relation(fields: [eventId], references: [id], onDelete: Cascade)
+
+  @@index([eventId, position])
+}
+
+model SetItem {
+  id          String   @id @default(cuid())
+  title       String
+  subtitle    String
+  genre       String
+  duration    String
+  platform    String
+  coverImage  String
+  embedUrl    String?
+  externalUrl String?
+  enabled     Boolean  @default(true)
+  position    Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([enabled, position])
+}
+
+model AboutSection {
+  id        String   @id @default("default")
+  title     String
+  body      String
+  imageUrl  String
+  enabled   Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model AboutStat {
+  id        String   @id @default(cuid())
+  value     String
+  label     String
+  enabled   Boolean  @default(true)
+  position  Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([enabled, position])
+}
+
+model Media {
+  id           String   @id @default(cuid())
+  filename     String   @unique
+  originalName String
+  mimeType     String
+  size         Int
+  url          String
+  createdAt    DateTime @default(now())
+  resource     Resource?
+}
+
+model Resource {
+  id          String   @id @default(cuid())
+  title       String
+  description String   @default("")
+  mediaId     String   @unique
+  enabled     Boolean  @default(true)
+  position    Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  media       Media    @relation(fields: [mediaId], references: [id], onDelete: Cascade)
+
+  @@index([enabled, position])
+}

@@ -1,0 +1,64 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-lent_presskit}
+      POSTGRES_USER: ${POSTGRES_USER:-lent}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Defina POSTGRES_PASSWORD}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-lent} -d ${POSTGRES_DB:-lent_presskit}"]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+    networks:
+      default:
+        aliases:
+          - lent-db
+
+  web:
+    build: .
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER:-lent}:${POSTGRES_PASSWORD}@lent-db:5432/${POSTGRES_DB:-lent_presskit}?schema=public
+      NEXTAUTH_URL: ${NEXTAUTH_URL:?Defina NEXTAUTH_URL}
+      NEXTAUTH_SECRET: ${NEXTAUTH_SECRET:?Defina NEXTAUTH_SECRET}
+      ADMIN_EMAIL: ${ADMIN_EMAIL:?Defina ADMIN_EMAIL}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:?Defina ADMIN_PASSWORD}
+      HOSTNAME: 0.0.0.0
+      STORAGE_DIR: /app/public/uploads
+    ports:
+      - "${LENT_PORT:-4177}:3000"
+    volumes:
+      - uploads_data:/app/public/uploads
+    networks:
+      - default
+      - coolify
+    labels:
+      traefik.enable: "true"
+      traefik.docker.network: coolify
+      traefik.http.middlewares.lent-presskit-redirect.redirectscheme.scheme: https
+      traefik.http.middlewares.lent-presskit-redirect.redirectscheme.permanent: "true"
+      traefik.http.routers.lent-presskit-http.entrypoints: http
+      traefik.http.routers.lent-presskit-http.rule: Host(`presskit.cadete.tech`)
+      traefik.http.routers.lent-presskit-http.middlewares: lent-presskit-redirect
+      traefik.http.routers.lent-presskit-http.service: lent-presskit
+      traefik.http.routers.lent-presskit-https.entrypoints: https
+      traefik.http.routers.lent-presskit-https.rule: Host(`presskit.cadete.tech`)
+      traefik.http.routers.lent-presskit-https.tls: "true"
+      traefik.http.routers.lent-presskit-https.tls.certresolver: letsencrypt
+      traefik.http.routers.lent-presskit-https.service: lent-presskit
+      traefik.http.services.lent-presskit.loadbalancer.server.port: "3000"
+
+volumes:
+  postgres_data:
+  uploads_data:
+
+networks:
+  coolify:
+    external: true

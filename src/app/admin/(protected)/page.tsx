@@ -1,0 +1,9 @@
+import Link from 'next/link';
+import { CalendarDays, Image as ImageIcon, Link2, ListMusic, Plus } from 'lucide-react';
+import { db } from '@/lib/db';
+
+export default async function AdminDashboard({ searchParams }: { searchParams: Promise<{ saved?: string }> }) {
+  const [agenda, events, sets, socials] = await Promise.all([db.agendaItem.count({ where: { enabled: true } }), db.recentEvent.count({ where: { enabled: true } }), db.setItem.count({ where: { enabled: true } }), db.socialLink.count({ where: { enabled: true } })]);
+  const params = await searchParams;
+  return <><header className="admin-topbar"><div><h1>Painel</h1><p>Visão geral do conteúdo publicado.</p></div><Link className="secondary-button" href="/"><ImageIcon size={16} /> Ver site</Link></header><div className="admin-content">{params.saved ? <div className="flash">Alterações salvas com sucesso.</div> : null}<div className="admin-grid"><div className="metric-card"><CalendarDays size={18} /><strong>{agenda}</strong><span>Próximos eventos</span></div><div className="metric-card"><ImageIcon size={18} /><strong>{events}</strong><span>Eventos publicados</span></div><div className="metric-card"><ListMusic size={18} /><strong>{sets}</strong><span>Sets publicados</span></div><div className="metric-card"><Link2 size={18} /><strong>{socials}</strong><span>Redes ativas</span></div></div><section className="admin-section admin-card"><div className="admin-card-header"><div><h2>Atalhos</h2><p>Acesse rapidamente o conteúdo que mais muda.</p></div></div><div className="form-actions"><Link className="primary-button" href="/admin/agenda/new"><Plus size={16} /> Novo compromisso</Link><Link className="secondary-button" href="/admin/eventos/new"><Plus size={16} /> Novo evento</Link><Link className="secondary-button" href="/admin/sets/new"><Plus size={16} /> Novo set</Link><Link className="secondary-button" href="/admin/hero">Alterar foto principal</Link></div></section></div></>;
+}

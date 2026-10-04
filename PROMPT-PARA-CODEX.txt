@@ -1,0 +1,42 @@
+Leia obrigatoriamente os arquivos de especificação deste projeto antes de alterar qualquer código.
+
+Ordem de leitura:
+
+1. `docs/spec/00-LEIA-PRIMEIRO.md`
+2. `docs/spec/01-PROMPT-MESTRE.md`
+3. `docs/spec/02-FIDELIDADE-VISUAL.md`
+4. `docs/spec/03-INSTRUCAO-EXECUCAO.md`
+5. `docs/spec/04-CRITERIOS-DE-ACEITE.md`
+
+Depois analise visualmente:
+
+- `docs/reference/site-admin-reference.png`
+- `docs/reference/lent-original.jpg`
+
+A imagem `site-admin-reference.png` é o DESIGN MASTER e deve ser tratada como alvo visual, não apenas inspiração.
+
+A fotografia `lent-original.jpg` é a imagem real do artista e deve ser preservada.
+
+Depois:
+
+1. Analise todo o repositório existente.
+2. Informe a stack e estrutura encontradas.
+3. Crie um plano técnico de implementação.
+4. Mostre a árvore de arquivos que pretende criar/alterar.
+5. Implemente o projeto completo conforme os documentos.
+6. Não pare em wireframe, scaffolding ou mock.
+7. Garanta persistência real, autenticação, uploads, painel e frontend funcional.
+8. Execute migrations, seed, lint, typecheck, testes e build.
+9. Corrija os erros encontrados.
+10. Faça uma revisão visual final comparando a implementação com `site-admin-reference.png`.
+
+Em caso de conflito:
+- a imagem define a composição visual;
+- `02-FIDELIDADE-VISUAL.md` define as regras de UI;
+- `01-PROMPT-MESTRE.md` define funcionalidades e arquitetura;
+- `04-CRITERIOS-DE-ACEITE.md` define quando o projeto está pronto.
+
+Não redesenhe a solução por preferência própria.
+Não transforme em SaaS genérico.
+Não adicione funcionalidades fora do escopo.
+Entregue LENT funcionando de ponta a ponta.
