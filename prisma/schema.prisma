@@ -168,3 +168,15 @@ model Resource {
 
   @@index([enabled, position])
 }
+
+model Photo {
+  id        String   @id @default(cuid())
+  title     String   @default("")
+  imageUrl  String
+  enabled   Boolean  @default(true)
+  position  Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([enabled, position])
+}

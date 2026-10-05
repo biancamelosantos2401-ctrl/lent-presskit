@@ -9,7 +9,7 @@
 import { db } from '@/lib/db';
 
 export async function getPublicSiteData() {
-  const [settings, sections, socials, agenda, events, sets, about, stats, resources] = await Promise.all([
+  const [settings, sections, socials, agenda, events, sets, about, stats, resources, photos] = await Promise.all([
     db.siteSettings.findUniqueOrThrow({ where: { id: 'default' } }),
     db.sectionSettings.findMany({ orderBy: { section: 'asc' } }),
     db.socialLink.findMany({ where: { enabled: true }, orderBy: { position: 'asc' } }),
@@ -19,6 +19,7 @@ export async function getPublicSiteData() {
     db.aboutSection.findUniqueOrThrow({ where: { id: 'default' } }),
     db.aboutStat.findMany({ where: { enabled: true }, orderBy: { position: 'asc' } }),
     db.resource.findMany({ where: { enabled: true }, include: { media: true }, orderBy: { position: 'asc' } }),
+    db.photo.findMany({ where: { enabled: true }, orderBy: { position: 'asc' }, take: 12 }),
   ]);
 
   let heroImages: string[] = [];
@@ -28,5 +29,5 @@ export async function getPublicSiteData() {
   } catch {
     heroImages = [];
   }
-  return { settings: { ...settings, heroImages: heroImages.length ? heroImages : [settings.heroImage] }, sections, socials, agenda, events, sets, about, stats, resources };
+  return { settings: { ...settings, heroImages: heroImages.length ? heroImages : [settings.heroImage] }, sections, socials, agenda, events, sets, about, stats, resources, photos };
 }

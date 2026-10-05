@@ -11,6 +11,7 @@
   --text-muted: #9b9d99;
   --accent: #b7ff3c;
   --danger: #ff4141;
+  --whatsapp: #39d353;
   --display: 'Bebas Neue', 'Arial Narrow', sans-serif;
   --body: 'Barlow Condensed', 'Arial Narrow', sans-serif;
 }
@@ -23,7 +24,9 @@ button, input, textarea, select { font: inherit; }
 button { cursor: pointer; }
 img { max-width: 100%; }
 
-.public-shell { min-height: 100vh; overflow: hidden; background: radial-gradient(circle at 55% 18%, rgba(0, 43, 35, 0.18), transparent 32%), var(--background); }
+/* overflow-x: clip contem o estouro lateral sem criar scrollport, que e o que
+   `overflow: hidden` fazia aqui — e isso desligava o position: sticky do header. */
+.public-shell { min-height: 100vh; overflow-x: clip; background: radial-gradient(circle at 55% 18%, rgba(0, 43, 35, 0.18), transparent 32%), var(--background); }
 .site-header { position: sticky; top: 0; z-index: 20; height: 76px; border-bottom: 1px solid var(--border); background: rgba(5, 5, 5, 0.84); backdrop-filter: blur(16px); }
 .header-inner { display: flex; align-items: center; justify-content: space-between; max-width: 1600px; height: 100%; margin: 0 auto; padding: 0 34px; }
 .header-logo { width: 86px; height: 50px; object-fit: contain; object-position: left center; }
@@ -256,7 +259,6 @@ img { max-width: 100%; }
   .header-inner, .site-footer { padding-right: 20px; padding-left: 20px; }
   .site-container { width: min(100% - 32px, 680px); }
   .site-nav, .site-header .booking-button { display: none; }
-  .mobile-menu { display: block; margin-left: auto; }
   .mobile-menu-button { width: 42px; height: 42px; }
   .hero { min-height: 720px; }
   .hero-image { inset: 0; }
@@ -315,9 +317,24 @@ img { max-width: 100%; }
 }
 
 @media (max-width: 820px) {
-  .public-shell { padding-bottom: 82px; }
-  .mobile-menu { position: fixed; right: 12px; bottom: max(12px, env(safe-area-inset-bottom)); left: 12px; z-index: 40; display: flex !important; align-items: center; gap: 4px; overflow-x: auto; border: 1px solid var(--border-strong); border-radius: 999px; background: rgba(10,11,11,.94); padding: 7px; box-shadow: 0 12px 36px rgba(0,0,0,.45); backdrop-filter: blur(16px); scrollbar-width: none; }
+  .public-shell { padding-bottom: 142px; }
+  .mobile-dock { position: fixed; right: 12px; bottom: max(12px, env(safe-area-inset-bottom)); left: 12px; z-index: 40; display: flex; flex-direction: column; gap: 8px; }
+  .mobile-dock-whatsapp { display: flex; align-items: center; justify-content: center; gap: 8px; border-radius: 999px; background: var(--whatsapp); color: #041006; padding: 12px 16px; font-size: 13px; font-weight: 700; letter-spacing: .04em; box-shadow: 0 10px 28px rgba(57,211,83,.28); }
+  .mobile-menu { display: flex !important; align-items: center; gap: 4px; overflow-x: auto; border: 1px solid var(--border-strong); border-radius: 999px; background: rgba(10,11,11,.94); padding: 7px; box-shadow: 0 12px 36px rgba(0,0,0,.45); backdrop-filter: blur(16px); scrollbar-width: none; }
   .mobile-menu::-webkit-scrollbar { display: none; }
   .mobile-menu a { flex: 1 0 auto; border-radius: 999px; color: var(--text-muted); padding: 10px 11px; font-size: 11px; font-weight: 700; letter-spacing: .08em; text-align: center; }
   .mobile-menu a:first-child, .mobile-menu a:hover { background: var(--accent); color: #050505; }
+}
+
+@media (min-width: 821px) {
+  .mobile-dock { display: none; }
+}
+
+.photo-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; }
+.photo-thumb { position: relative; margin: 0; aspect-ratio: 1; overflow: hidden; border: 1px solid var(--border); border-radius: 6px; background: var(--surface); }
+.photo-thumb img { width: 100%; height: 100%; object-fit: cover; transition: transform .35s ease; }
+.photo-thumb:hover img { transform: scale(1.04); }
+
+@media (max-width: 560px) {
+  .photo-grid { grid-template-columns: repeat(3, 1fr); gap: 6px; }
 }

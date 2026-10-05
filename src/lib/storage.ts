@@ -1,13 +1,12 @@
 /**
  * @module Storage
- * @description Storage local persistente com contrato preparado para providers externos.
+ * @description Storage persistente em Vercel Blob com contrato estável para o acervo de mídia.
  * @layer Infrastructure
- * @depends node fs, crypto
+ * @depends @vercel/blob, crypto
  * @consumers upload API and media services
  * @maintenance docs/MAINTENANCE.md#uploads
  */
-import { mkdir, writeFile } from 'node:fs/promises';
-import path from 'node:path';
+import { del, put } from '@vercel/blob';
 import { randomUUID } from 'node:crypto';
 import { db } from '@/lib/db';
 
@@ -66,34 +65,42 @@ export function formatStorageBytes(bytes: number) {
 /**
  * Remove um arquivo salvo quando o registro de mídia não pôde ser concluído.
  *
- * @param filename - Nome UUID do arquivo persistido.
+ * Arquivos legados servidos de `/uploads` continuam no bundle público e não têm
+ * o que remover no Blob, por isso a ausência de URL absoluta é ignorada.
+ *
+ * @param filename - Nome do arquivo ou URL absoluta retornada pelo Blob.
  * @returns Promise resolvida após a tentativa de remoção.
  * @maintenance docs/MAINTENANCE.md#uploads
  */
 export async function removeStoredImage(filename: string) {
-  const { unlink } = await import('node:fs/promises');
-  const directory = path.resolve(process.env.STORAGE_DIR ?? './public/uploads');
-  await unlink(path.join(directory, filename)).catch(() => undefined);
+  if (!filename.startsWith('http')) return;
+  await del(filename).catch(() => undefined);
 }
 
+/**
+ * Valida e grava uma imagem no Blob público.
+ *
+ * @param file - Imagem recebida pelo formulário multipart.
+ * @returns Metadados do arquivo gravado, com URL absoluta do Blob.
+ * @throws Error quando o MIME ou o tamanho são inválidos.
+ * @maintenance docs/MAINTENANCE.md#uploads
+ */
 export async function storeImage(file: File) {
   const extension = allowedTypes.get(file.type);
   if (!extension) throw new Error('Formato inválido. Use JPG, PNG ou WEBP.');
   if (file.size <= 0 || file.size > MAX_UPLOAD_BYTES) throw new Error('A imagem deve ter até 10 MB.');
 
   const filename = `${randomUUID()}${extension}`;
-  const directory = path.resolve(process.env.STORAGE_DIR ?? './public/uploads');
-  await mkdir(directory, { recursive: true });
-  await writeFile(path.join(directory, filename), Buffer.from(await file.arrayBuffer()));
+  const blob = await put(`uploads/${filename}`, file, { access: 'public', contentType: file.type });
 
-  return { filename, url: `/uploads/${filename}`, mimeType: file.type, size: file.size };
+  return { filename: blob.url, url: blob.url, mimeType: file.type, size: file.size };
 }
 
 /**
- * Valida e grava um PDF no volume persistente.
+ * Valida e grava um PDF no Blob público.
  *
  * @param file - PDF recebido pelo formulário multipart.
- * @returns Metadados do arquivo gravado.
+ * @returns Metadados do arquivo gravado, com URL absoluta do Blob.
  * @throws Error quando o MIME ou o tamanho individual são inválidos.
  * @maintenance docs/MAINTENANCE.md#uploads
  */
@@ -102,9 +109,7 @@ export async function storeDocument(file: File) {
   if (file.size <= 0 || file.size > MAX_DOCUMENT_BYTES) throw new Error('O PDF deve ter até 50 MB.');
 
   const filename = `${randomUUID()}.pdf`;
-  const directory = path.resolve(process.env.STORAGE_DIR ?? './public/uploads');
-  await mkdir(directory, { recursive: true });
-  await writeFile(path.join(directory, filename), Buffer.from(await file.arrayBuffer()));
+  const blob = await put(`uploads/${filename}`, file, { access: 'public', contentType: file.type });
 
-  return { filename, url: `/uploads/${filename}`, mimeType: file.type, size: file.size };
+  return { filename: blob.url, url: blob.url, mimeType: file.type, size: file.size };
 }

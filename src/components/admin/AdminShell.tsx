@@ -4,13 +4,14 @@ import { signOut } from 'next-auth/react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { CalendarDays, ExternalLink, FileText, Home, Image as ImageIcon, Info, Link2, ListMusic, LogOut, MessageCircle } from 'lucide-react';
+import { CalendarDays, ExternalLink, FileText, Home, Image as ImageIcon, Images, Info, Link2, ListMusic, LogOut, MessageCircle } from 'lucide-react';
 
 const nav = [
   { href: '/admin', label: 'Painel', icon: Home },
   { href: '/admin/hero', label: 'Hero', icon: ImageIcon },
   { href: '/admin/agenda', label: 'Agenda', icon: CalendarDays },
   { href: '/admin/eventos', label: 'Últimos eventos', icon: ImageIcon },
+  { href: '/admin/fotos', label: 'Fotos', icon: Images },
   { href: '/admin/materiais', label: 'Arquivos e materiais', icon: FileText },
   { href: '/admin/sets', label: 'SETs', icon: ListMusic },
   { href: '/admin/sobre', label: 'Sobre', icon: Info },

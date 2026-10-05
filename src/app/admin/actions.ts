@@ -176,6 +176,50 @@ export async function toggleResourceAction(formData: FormData) {
   redirectSaved('/admin/materiais');
 }
 
+export async function createPhotosAction(formData: FormData) {
+  await requireAdmin();
+  const urls = parseStringArray(formData, 'urls').filter((url) => url.length > 0);
+  if (!urls.length) throw new Error('Envie ao menos uma foto antes de publicar.');
+  const start = await db.photo.count();
+  await db.photo.createMany({ data: urls.map((imageUrl, index) => ({ imageUrl, position: start + index })) });
+  redirectSaved('/admin/fotos');
+}
+
+export async function togglePhotoAction(formData: FormData) {
+  await requireAdmin();
+  await db.photo.update({ where: { id: text(formData, 'id') }, data: { enabled: checked(formData, 'enabled') } });
+  redirectSaved('/admin/fotos');
+}
+
+export async function deletePhotoAction(formData: FormData) {
+  await requireAdmin();
+  const id = text(formData, 'id');
+  const existing = await db.photo.findUnique({ where: { id } });
+  if (!existing) throw new Error('Foto não encontrada.');
+  await db.photo.delete({ where: { id } });
+  await removeStoredImage(existing.imageUrl);
+  redirectSaved('/admin/fotos');
+}
+
+export async function movePhotoAction(formData: FormData) {
+  await requireAdmin();
+  const id = text(formData, 'id');
+  const direction = text(formData, 'direction') === 'up' ? -1 : 1;
+  const current = await db.photo.findUnique({ where: { id } });
+  if (!current) throw new Error('Foto não encontrada.');
+  const neighbour = await db.photo.findFirst({
+    where: direction === -1 ? { position: { lt: current.position } } : { position: { gt: current.position } },
+    orderBy: { position: direction === -1 ? 'desc' : 'asc' },
+  });
+  if (neighbour) {
+    await db.$transaction([
+      db.photo.update({ where: { id: current.id }, data: { position: neighbour.position } }),
+      db.photo.update({ where: { id: neighbour.id }, data: { position: current.position } }),
+    ]);
+  }
+  redirectSaved('/admin/fotos');
+}
+
 function parseStringArray(formData: FormData, key: string) {
   try {
     const raw = text(formData, key);

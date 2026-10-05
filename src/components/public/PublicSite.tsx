@@ -4,6 +4,7 @@ import Image from 'next/image';
 import { SocialLinks } from '@/components/public/SocialLinks';
 import { FixedMobileMenu } from '@/components/public/FixedMobileMenu';
 import { HeroSlideshow } from '@/components/public/HeroSlideshow';
+import { PhotoGrid } from '@/components/public/PhotoGrid';
 import { SoundCloudPreview } from '@/components/public/SoundCloudPreview';
 
 type PublicData = Awaited<ReturnType<typeof getPublicSiteData>>;
@@ -29,16 +30,19 @@ export function PublicSite({ data }: { data: PublicData }) {
   const eventsSection = sectionFor(data, 'events');
   const setsSection = sectionFor(data, 'sets');
   const event = data.events[0];
+  const whatsappUrl = data.settings.whatsappEnabled && data.settings.whatsappPhone
+    ? `https://wa.me/${data.settings.whatsappPhone.replace(/\D/g, '')}?text=${encodeURIComponent(data.settings.whatsappMessage ?? '')}`
+    : null;
 
   return (
+    <>
     <main className="public-shell">
       <header className="site-header">
         <div className="header-inner">
           <a href="#home" aria-label="LENT — início"><Image className="header-logo" src="/brand/lent-logo.png" alt="LENT" width={150} height={100} priority /></a>
           <nav className="site-nav" aria-label="Navegação principal">
-            <a className="active" href="#home">HOME</a><a href="#agenda">AGENDA</a><a href="#eventos">EVENTOS</a><a href="#sets">SETS</a><a href="#sobre">SOBRE</a><a href="#materiais">MATERIAIS</a><a href="#contato">CONTATO</a>
+            <a className="active" href="#home">HOME</a><a href="#agenda">AGENDA</a><a href="#eventos">EVENTOS</a><a href="#sets">SETS</a><a href="#fotos">FOTOS</a><a href="#sobre">SOBRE</a><a href="#materiais">MATERIAIS</a><a href="#contato">CONTATO</a>
           </nav>
-          <FixedMobileMenu />
         </div>
       </header>
 
@@ -81,11 +85,15 @@ export function PublicSite({ data }: { data: PublicData }) {
           </article>
         </section>
 
+        <section id="fotos" className="materials-section"><div className="materials-heading"><div><p className="eyebrow">GALERIA</p><h2>FOTOS</h2></div><span className="materials-count">{data.photos.length.toString().padStart(2, '0')} FOTOS</span></div><PhotoGrid photos={data.photos} /></section>
+
         <section id="materiais" className="materials-section"><div className="materials-heading"><div><p className="eyebrow">DOWNLOADS OFICIAIS</p><h2>ARQUIVOS E MATERIAIS</h2></div><span className="materials-count">{data.resources.length.toString().padStart(2, '0')} ARQUIVOS</span></div>{data.resources.length ? <div className="materials-list">{data.resources.map((resource) => <a className="material-row" href={resource.media.url} download key={resource.id}><div><strong>{resource.title}</strong><small>{resource.description || resource.media.originalName}</small></div><span className="material-file">PDF <ArrowDownToLine size={17} /></span></a>)}</div> : <div className="empty-state">Materiais oficiais em breve.</div>}</section>
 
         {data.about.enabled ? <section id="sobre" className="about-section"><div className="about-image"><Image src={data.about.imageUrl} alt="João Quaresma, LENT" width={520} height={420} /></div><div className="about-copy"><h2>{data.about.title}</h2><p>{data.about.body}</p></div><div className="stats">{data.stats.map((stat) => <div className="stat" key={stat.id}><strong>{stat.value}</strong><span>{stat.label}</span></div>)}</div></section> : null}
       </div>
       <footer id="contato" className="site-footer"><span><strong>LENT</strong> · JOÃO QUARESMA</span><span>BOOKING · MUSIC / PARTY / CULTURE</span></footer>
     </main>
+    <FixedMobileMenu whatsappUrl={whatsappUrl} whatsappLabel={data.settings.whatsappButtonText} />
+    </>
   );
 }
