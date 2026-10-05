@@ -12,3 +12,5 @@ public/uploads/*
 coverage/
 prisma/dev.db
 prisma/dev.db-journal
+
+.vercel
